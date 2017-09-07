@@ -61,12 +61,12 @@ TXN_QUERIES = {
         "getDistrict": "SELECT D_TAX, D_NEXT_O_ID FROM DISTRICT WHERE D_ID = $1 AND D_W_ID = $2", # d_id, w_id
         "incrementNextOrderId": "UPDATE DISTRICT SET D_NEXT_O_ID = $1 WHERE D_ID = $2 AND D_W_ID = $3", # d_next_o_id, d_id, w_id
         "getCustomer": "SELECT C_DISCOUNT, C_LAST, C_CREDIT FROM CUSTOMER USE KEYS [(to_string($1) || '.' ||  to_string($2) || '.' ||  to_string($3)) ] ", # w_id, d_id, c_id
-        "createOrder": "INSERT INTO ORDERS (KEY, VALUE) VALUES (TO_STRING($3) || '.' ||  TO_STRING($2) || '.' ||  TO_STRING($1), {\\\"O_ID\\\":$1, \\\"O_D_ID\\\":$2, \\\"O_W_ID\\\":$3, \\\"O_C_ID\\\":$4, \\\"O_ENTRY_D\\\":$5, \\\"O_CARRIER_ID\\\":$6, \\\"O_OL_CNT\\\":$7, \\\"O_ALL_LOCAL\\\":$8})", # d_next_o_id, d_id, w_id, c_id, o_entry_d, o_carrier_id, o_ol_cnt, o_all_local
-        "createNewOrder": "INSERT INTO NEW_ORDER(KEY, VALUE) VALUES(TO_STRING($2)|| '.' || TO_STRING($3)|| '.' || TO_STRING($1), {\\\"NO_O_ID\\\":$1,\\\"NO_D_ID\\\":$2,\\\"NO_W_ID\\\":$3})",
+        "createOrder": "UPSERT INTO ORDERS (KEY, VALUE) VALUES (TO_STRING($3) || '.' ||  TO_STRING($2) || '.' ||  TO_STRING($1), {\\\"O_ID\\\":$1, \\\"O_D_ID\\\":$2, \\\"O_W_ID\\\":$3, \\\"O_C_ID\\\":$4, \\\"O_ENTRY_D\\\":$5, \\\"O_CARRIER_ID\\\":$6, \\\"O_OL_CNT\\\":$7, \\\"O_ALL_LOCAL\\\":$8})", # d_next_o_id, d_id, w_id, c_id, o_entry_d, o_carrier_id, o_ol_cnt, o_all_local
+        "createNewOrder": "UPSERT INTO NEW_ORDER(KEY, VALUE) VALUES(TO_STRING($2)|| '.' || TO_STRING($3)|| '.' || TO_STRING($1), {\\\"NO_O_ID\\\":$1,\\\"NO_D_ID\\\":$2,\\\"NO_W_ID\\\":$3})",
         "getItemInfo": "SELECT I_PRICE, I_NAME, I_DATA FROM ITEM USE KEYS [to_string($1)]", # ol_i_id
         "getStockInfo": "SELECT S_QUANTITY, S_DATA, S_YTD, S_ORDER_CNT, S_REMOTE_CNT, S_DIST_%02d FROM STOCK USE KEYS [TO_STRING($2)|| '.' || TO_STRING($1)]", # d_id, ol_i_id, ol_supply_w_id
         "updateStock": "UPDATE STOCK USE KEYS [to_string($6) || '.' || to_string($5)] SET S_QUANTITY = $1, S_YTD = $2, S_ORDER_CNT = $3, S_REMOTE_CNT = $4 ", # s_quantity, s_order_cnt, s_remote_cnt, ol_i_id, ol_supply_w_id
-        "createOrderLine": "INSERT INTO ORDER_LINE(KEY, VALUE) VALUES(TO_STRING($3)|| '.' || TO_STRING($2)|| '.' || TO_STRING($1)|| '.' || TO_STRING($4), { \\\"OL_O_ID\\\":$1, \\\"OL_D_ID\\\":$2, \\\"OL_W_ID\\\":$3, \\\"OL_NUMBER\\\":$4, \\\"OL_I_ID\\\":$5, \\\"OL_SUPPLY_W_ID\\\":$6, \\\"OL_DELIVERY_D\\\":$7, \\\"OL_QUANTITY\\\":$8, \\\"OL_AMOUNT\\\":$9, \\\"OL_DIST_INFO\\\":$10})" # o_id, d_id, w_id, ol_number, ol_i_id, ol_supply_w_id, ol_quantity, ol_amount, ol_dist_info        
+        "createOrderLine": "UPSERT INTO ORDER_LINE(KEY, VALUE) VALUES(TO_STRING($3)|| '.' || TO_STRING($2)|| '.' || TO_STRING($1)|| '.' || TO_STRING($4), { \\\"OL_O_ID\\\":$1, \\\"OL_D_ID\\\":$2, \\\"OL_W_ID\\\":$3, \\\"OL_NUMBER\\\":$4, \\\"OL_I_ID\\\":$5, \\\"OL_SUPPLY_W_ID\\\":$6, \\\"OL_DELIVERY_D\\\":$7, \\\"OL_QUANTITY\\\":$8, \\\"OL_AMOUNT\\\":$9, \\\"OL_DIST_INFO\\\":$10})" # o_id, d_id, w_id, ol_number, ol_i_id, ol_supply_w_id, ol_quantity, ol_amount, ol_dist_info
     },
     
     "ORDER_STATUS": {
@@ -85,7 +85,7 @@ TXN_QUERIES = {
         "getCustomersByLastName": "SELECT C_ID, C_FIRST, C_MIDDLE, C_LAST, C_STREET_1, C_STREET_2, C_CITY, C_STATE, C_ZIP, C_PHONE, C_SINCE, C_CREDIT, C_CREDIT_LIM, C_DISCOUNT, C_BALANCE, C_YTD_PAYMENT, C_PAYMENT_CNT, C_DATA FROM CUSTOMER WHERE C_W_ID = $1 AND C_D_ID = $2 AND C_LAST = $3 ORDER BY C_FIRST", # w_id, d_id, c_last
         "updateBCCustomer": "UPDATE CUSTOMER USE KEYS [(to_string($6) || '.' ||  to_string($6) || '.' ||  to_string($7)) ] SET C_BALANCE = $1, C_YTD_PAYMENT = $2, C_PAYMENT_CNT = $3, C_DATA = $4 ", # c_balance, c_ytd_payment, c_payment_cnt, c_data, c_w_id, c_d_id, c_id
         "updateGCCustomer": "UPDATE CUSTOMER USE KEYS [(to_string($4) || '.' ||  to_string($5) || '.' ||  to_string($6)) ] SET C_BALANCE = $1, C_YTD_PAYMENT = $2, C_PAYMENT_CNT = $3 ", # c_balance, c_ytd_payment, c_payment_cnt, c_w_id, c_d_id, c_id
-        "insertHistory": "INSERT INTO HISTORY(KEY, VALUE) VALUES (TO_STRING($1)|| '.' || TO_STRING($2)|| '.' || TO_STRING($3), {\\\"H_C_ID\\\":$1, \\\"H_C_D_ID\\\":$2, \\\"H_C_W_ID\\\":$3, \\\"H_D_ID\\\":$4, \\\"H_W_ID\\\":$5, \\\"H_DATE\\\":$6, \\\"H_AMOUNT\\\":$7, \\\"H_DATA\\\":$8})"
+        "insertHistory": "UPSERT INTO HISTORY(KEY, VALUE) VALUES (TO_STRING($1)|| '.' || TO_STRING($2)|| '.' || TO_STRING($3), {\\\"H_C_ID\\\":$1, \\\"H_C_D_ID\\\":$2, \\\"H_C_W_ID\\\":$3, \\\"H_D_ID\\\":$4, \\\"H_W_ID\\\":$5, \\\"H_DATE\\\":$6, \\\"H_AMOUNT\\\":$7, \\\"H_DATA\\\":$8})"
     },
     
     "STOCK_LEVEL": {
@@ -422,7 +422,7 @@ class N1QlDriver(AbstractDriver):
         else:
             i = 0
 	    # print tuples
-	    sql = 'INSERT INTO %s(KEY, VALUE) ' % tableName
+	    sql = 'UPSERT INTO %s(KEY, VALUE) ' % tableName
 	    for t in tuples:
                 # print tableName
                 # print KEYNAMES[tableName]
@@ -439,7 +439,7 @@ class N1QlDriver(AbstractDriver):
 			else:
 				key = key + str(t[k])
 			l = l + 1;
-	        #sql = 'INSERT INTO %s(KEY, VALUE) VALUES (\\"%s\\", {' % (tableName, key)
+	        #sql = 'UPSERT INTO %s(KEY, VALUE) VALUES (\\"%s\\", {' % (tableName, key)
 	        if i != 0:
 	            sql = sql + ',VALUES (\\"%s\\", {' % key
 	        else:
@@ -462,7 +462,7 @@ class N1QlDriver(AbstractDriver):
 	            # r = requests.post(url, data=jsql, auth=('Administrator', 'password'))
 	            # print tableName, r, i, len(nsql)
 	            # print r.json()
-		    sql = 'INSERT INTO %s(KEY, VALUE) ' % tableName
+		    sql = 'UPSERT INTO %s(KEY, VALUE) ' % tableName
 	            i = 0
                 else:
 	            sql = sql + "})"
